@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Project 1 - Data Visualization - Ryan Neal</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+  </head>
+  <body>
+    <div>
+      <div>
+        <ul>
+          <li>
+            <p>
+              <a href="index.html">Visualization</a>
+            </p>
+          </li>
+          <li>
+            <p>
+              <a href="documentation.html">Documentation</a>
+            </p>
+          </li>
+          <li>
+            <p>
+              <a href="videoPage.html">Video</a>
+            </p>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h2 style="text-align: left;">London's 1854 Cholera Epidemic</h2>
+        <h3 style="text-align: left;">Data Visualization by Ryan Neal</h3>
+      </div>
+      <div>
+          <h3 style="text-align: left;">Map of London</h3>
+          <div style="text-align:center;">
+            <div>
+              <ul style="text-align: center;">
+                <h3 style="color: skyblue;">Male Victim Locations = Skyblue Dots</h3>
+                <h3 style="color: pink;">Female Victims Locations = Pink Dots</h3>
+                <h3 style="color: black;">Location of pumps = Black Dots</h3>
+              </ul>
+            </div>
+            <svg id="mapArea" width="600" height="500"></svg>
+          </div>
+        <div>
+          <h3 style="text-align: center;">Timeline of Deaths per Day</h3>
+          <div style="text-align:center;">
+            <svg id="bar-chart" width="500" height="500" font-size="10px"></svg>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="text-align: left;">Death by Age Groups</h3>
+        <div>
+          <ul style="text-align:  left;">
+            <h3 style="color: blue;">Ages 0-10</h3>
+            <h3 style="color: darkorange;">Ages 11-20</h3>
+            <h3 style="color: green;">Ages 21-40</h3>
+            <h3 style="color: red;">Ages 41-60</h3>
+            <h3 style="color: mediumpurple;">Ages 61-80</h3>
+            <h3 style="color: firebrick;">Ages > 80</h3>
+          </ul>
+        </div>
+        <svg id="pie-chart" width="300" height="300" text-align="center"></svg>
+      </div>
+      <div>
+        <h3 style="text-align: left;">Death by sex</h3>
+        <div>
+          <ul style="text-align:  left;">
+            <h3 style="color: blue;">Sex: Male</h3>
+            <h3 style="color: darkorange;">Sex: Female</h3>
+          </ul>
+        </div>
+        <svg id="pie-chart2" width="300" height="300" text-align="center"></svg>
+      </div>
+      <script>
+        d3.json("data/streets.json", function(data) {
+          var pathGenerator = d3.svg.line().x(function(d) {
+            return 650 - d.x * 30;
+          }).y(function(d) {
+            return 570 - d.y * 30;
+          });
+          var g = d3.select('#mapArea').append('g')
+          for (var i = 0; i <= data.length; i++) {
+            var line = data[i];
+            g.append('path').style('fill', 'none').style('stroke', '#414141').style('stroke-width', '3px').attr('d', pathGenerator(line))
+          }
+        });
+        d3.csv("data/pumps.csv", function(data) {
+          var dots = d3.select('#mapArea').append('g');
+          dots.selectAll('circle').data(data).enter().append('circle').style('fill', 'black').attr('r', '5px').attr('cx', function(d) {
+            return 650 - d.x * 30;
+          }).attr('cy', function(d) {
+            return 570 - d.y * 30;
+          }).attr('id', function(d) {
+            return 'dots' + d.id;
+          });
+        });
+        d3.csv("data/deathdays.csv", function(days) {
+          d3.csv("data/deaths_age_sex.csv", function(deaths) {
+            var v = 0;
+            for (i = 0; i < days.length; i++) {
+              var Day = days[i].date;
+              var howManyDied = days[i].deaths;
+              for (k = 0; k < howManyDied; k++) {
+                deaths[v].date = Day;
+                v++;
+              }
+            }
+            var dots = d3.select('#mapArea').append('g');
+            var cValue = function(d) {
+                return d["gender"];
+              },
+              color = d3.scale.linear().domain([1, length]).range([d3.rgb("skyblue"), d3.rgb('pink')]);
+            dots.selectAll('circle').data(deaths).enter().append('circle').style('fill', 'red').attr('r', '3px').attr('cx', function(d) {
+              return 650 - d.x * 30;
+            }).attr('cy', function(d) {
+              return 570 - d.y * 30;
+            }).attr('id', function(d) {
+              return 'dots' + d.id;
+            }).attr('class', function(d) {
+              return 'dot' + d.date;
+            }).style("fill", function(d) {
+              return color(cValue(d));
+            })
+            var margin = {
+                top: 0,
+                right: 20,
+                bottom: 50,
+                left: 40
+              },
+              width = 500 - margin.left - margin.right,
+              height = 500 - margin.top - margin.bottom;
+            var deathNumbers = d3.format("");
+            var mindate = new Date(1854, 7, 19),
+              maxdate = new Date(1854, 8, 29);
+            var padding = 100;
+            var xScale = d3.time.scale().domain([mindate, maxdate]).range([0, width]);
+            var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+            var y = d3.scale.linear().range([height, 0]).domain([0, 150])
+            var xAxis = d3.svg.axis().orient("bottom").scale(xScale)
+            var yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(deathNumbers);
+            var svg = d3.select("#bar-chart").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            x.domain(days.map(function(d) {
+              return d.date;
+            }));
+            svg.append("g").attr("class", "axis xaxis").attr("transform", "translate(0," + height + ")").call(xAxis)
+            svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)")
+            svg.selectAll(".bar1").data(days).enter().append("rect").attr("class", "bar1").attr("x", function(d) {
+              return x(d.date);
+            }).attr("width", x.rangeBand()).attr("y", function(d) {
+              return y(d.deaths);
+            }).attr("height", function(d) {
+              return height - y(d.deaths);
+            }).attr('id', function(d) {
+              return 'bar1' + d.date;
+            }).on('mouseover', function(d) {
+              d3.selectAll('.' + 'dot' + d.date).style("fill", function(d) {
+                return color(cValue(d));
+              }).attr('r', '8px')
+            }).on('mouseout', function(d) {
+              d3.selectAll('.' + 'dot' + d.date).style("fill", function(d) {
+                return color(cValue(d));
+              }).attr('r', '3px')
+            })
+          });
+
+          function type(d) {
+            d.deaths = +d.deaths;
+            return d;
+          }
+        });
+      </script>
+      <script>
+        var deathdataset = [144, 48, 58, 57, 91, 173];
+        var pie = d3.layout.pie();
+        var w = 300
+        var h = 300
+        var outerRadius = w / 2;
+        var innerRadius = 0;
+        var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+        var svg = d3.select('#pie-chart').append("svg").attr("width", w).attr("height", h);
+        var arcs = svg.selectAll("g.arc").data(pie(deathdataset)).enter().append("g").attr("class", "arc").attr("transform", "translate(" + outerRadius + ", " + outerRadius + ")");
+        var color = d3.scale.category10();
+        arcs.append("path").attr("fill", function(d, i) {
+          return color(i);
+        }).attr("d", arc);
+        arcs.append("text").attr("transform", function(d) {
+          return "translate(" + arc.centroid(d) + ")";
+        }).attr("text-anchor", "middle").text(function(d) {
+          return d.value;
+        })
+      </script>
+      <script>
+        var sexdeathdataset = [285, 286];
+        var pie = d3.layout.pie();
+        var w = 300
+        var h = 300
+        var outerRadius = w / 2;
+        var innerRadius = 0;
+        var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+        var svg = d3.select('#pie-chart2').append("svg").attr("width", w).attr("height", h);
+        var arcs = svg.selectAll("g.arc").data(pie(sexdeathdataset)).enter().append("g").attr("class", "arc").attr("transform", "translate(" + outerRadius + ", " + outerRadius + ")");
+        var color = d3.scale.category10();
+        arcs.append("path").attr("fill", function(d, i) {
+          return color(i);
+        }).attr("d", arc);
+        arcs.append("text").attr("transform", function(d) {
+          return "translate(" + arc.centroid(d) + ")";
+        }).attr("text-anchor", "middle").text(function(d) {
+          return d.value;
+        })
+      </script>
+  </body>
+</html>
