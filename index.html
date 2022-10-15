@@ -163,8 +163,7 @@
             }).attr('id', function(d) {
               return 'bar1' + d.date;
             }).on('mouseover', function(d) {
-              d3.selectAll('.' + 'dot' + d.date).attr("fill","orangered").style("fill", function(d) {
-                return color(cValue(d));
+              d3.selectAll('.' + 'dot' + d.date).attr("fill","orangered")
               }).attr('r', '8px')
             }).on('mouseout', function(d) {
               d3.selectAll('.' + 'dot' + d.date).style("fill", function(d) {
@@ -177,7 +176,7 @@
             d.deaths = +d.deaths;
             return d;
           }
-        });
+        
       </script>
       <script>
         var deathdataset = [144, 48, 58, 57, 91, 173];
