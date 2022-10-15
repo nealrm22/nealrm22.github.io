@@ -154,6 +154,7 @@
             .data(days)
             .enter().append("rect")
             .attr("class", "bar1")
+            .attr("fill","orangered")
             .attr("x", function(d) {
               return x(d.date);
             }).attr("width", x.rangeBand()).attr("y", function(d) {
