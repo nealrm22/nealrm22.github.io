@@ -140,13 +140,21 @@
             var y = d3.scale.linear().range([height, 0]).domain([0, 150])
             var xAxis = d3.svg.axis().orient("bottom").scale(xScale)
             var yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(deathNumbers);
+            
             var svg = d3.select("#bar-chart").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
             x.domain(days.map(function(d) {
               return d.date;
             }));
             svg.append("g").attr("class", "axis xaxis").attr("transform", "translate(0," + height + ")").call(xAxis)
-            svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)")
-            svg.selectAll(".bar1").data(days).enter().append("rect").attr("class", "bar1").attr("x", function(d) {
+            svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", ".71em").style("text-anchor", "end").text("Number of Deaths");
+
+
+            svg.selectAll(".bar1")
+            .data(days)
+            .enter().append("rect")
+            .attr("class", "bar1")
+            .attr("x", function(d) {
               return x(d.date);
             }).attr("width", x.rangeBand()).attr("y", function(d) {
               return y(d.deaths);
