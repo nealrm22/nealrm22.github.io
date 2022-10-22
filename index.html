@@ -140,7 +140,7 @@
             var y = d3.scale.linear().range([height, 0]).domain([0, 150])
             var xAxis = d3.svg.axis().orient("bottom").scale(xScale)
             var yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(deathNumbers);
-            var svg = d3.select("#bar-chart").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).attr("fill", "grey").append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            var svg = d3.select("#bar-chart").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).attr("fill", "black").append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
             x.domain(days.map(function(d) {
               return d.date;
             }));
